@@ -19,7 +19,8 @@ import yaml
 SYSTEM_PROMPT = """你是一个命令行翻译器。用户会用中文描述他想做的事，你需要翻译成一条可执行的 shell 命令。
 
 规则：
-1. 只输出命令本身，不要加任何解释、markdown 代码块标记、或前后缀文字
+1. 只输出命令本身，不要加任何解释、markdown 代码块标记、或前后缀文字。
+   一定要确保输出的只有一行命令，不要换行，不要额外文字。
 2. 命令应该能直接在当前 shell 中执行
 3. 如果用户描述模糊，选择最常见、最合理的实现方式
 4. 涉及路径时使用用户描述的路径，不要随意替换
@@ -115,6 +116,8 @@ class Translator:
             command = response.choices[0].message.content.strip()
             # 去掉可能的 markdown 包裹
             command = command.removeprefix("```").removesuffix("```").strip()
+            # 只取第一行，扔掉模型额外输出的解释文字
+            command = command.split("\n")[0].strip()
             return command if command else None
 
         except Exception as e:
