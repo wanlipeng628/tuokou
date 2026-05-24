@@ -1,7 +1,6 @@
-"""tuokou HTTP daemon.
+"""脱口 HTTP 守护进程。
 
-A persistent background process that receives translation requests.
-Eliminates the cold-start cost of launching a new Python process per keystroke.
+后台常驻，接收翻译请求。避免每次 Enter 启动新 Python 进程。
 """
 
 import json
@@ -19,7 +18,7 @@ PORT = 28630
 
 
 class TuokouHandler(BaseHTTPRequestHandler):
-    """HTTP request handler for translation and execution."""
+    """HTTP 请求处理器，处理翻译和执行请求。"""
 
     translator: Optional[Translator] = None
 
@@ -37,17 +36,17 @@ class TuokouHandler(BaseHTTPRequestHandler):
         else:
             self._json({"error": "not found"}, 404)
 
-    # ---- Routes ----
+    # ---- 路由 ----
 
     def _handle_translate(self, params: dict):
         q = self._get_param(params, "q")
         if not q:
-            return self._json({"error": "missing q"}, 400)
+            return self._json({"error": "缺少参数 q"}, 400)
 
         t = self._get_translator()
         command = t.translate(q)
         if not command:
-            return self._json({"error": "Translation failed", "command": None, "level": "unknown"})
+            return self._json({"error": "翻译失败", "command": None, "level": "unknown"})
 
         level, warning = classify(command)
         level_str = level.value if isinstance(level, DangerLevel) else "unknown"
@@ -66,12 +65,12 @@ class TuokouHandler(BaseHTTPRequestHandler):
     def _handle_execute(self, params: dict):
         cmd = self._get_param(params, "cmd")
         if not cmd:
-            return self._json({"error": "missing cmd"}, 400)
+            return self._json({"error": "缺少参数 cmd"}, 400)
 
         output = execute(cmd)
         self._json({"output": output or ""})
 
-    # ---- Helpers ----
+    # ---- 辅助方法 ----
 
     def _get_translator(self) -> Translator:
         if TuokouHandler.translator is None:
@@ -97,7 +96,7 @@ class TuokouHandler(BaseHTTPRequestHandler):
 
 
 def run_daemon():
-    """Start the daemon server."""
+    """启动守护进程。"""
     import socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -108,7 +107,7 @@ def run_daemon():
     server.socket = sock
 
     if not hasattr(sys, "_called_from_test"):
-        print(f"[tuokou] Daemon started: http://{HOST}:{PORT}", flush=True)
+        print(f"[脱口] 守护进程启动: http://{HOST}:{PORT}", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
@@ -116,7 +115,7 @@ def run_daemon():
 
 
 def stop_daemon():
-    """Send stop signal to the daemon."""
+    """发送停止信号。"""
     import urllib.request
 
     try:
@@ -129,7 +128,7 @@ def stop_daemon():
 
 
 def is_running() -> bool:
-    """Check if the daemon is currently running."""
+    """检查守护进程是否在运行。"""
     import urllib.request
 
     try:

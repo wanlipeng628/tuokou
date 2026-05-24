@@ -109,6 +109,8 @@ llm:
 
 支持任意 OpenAI 兼容接口：OpenAI、DeepSeek、通义千问、Ollama（本地）等。
 
+> ⚠️ **安全提醒**：`config.yaml` 包含你的 API 密钥，**切勿提交到 Git 仓库**。项目已内置 `.gitignore` 自动排除该文件，但请确保不要手动添加它。
+
 > **Windows 用户注意：** 安装后重新打开一个终端。profile 脚本会自动启动守护进程。
 
 ---

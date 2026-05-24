@@ -1,17 +1,34 @@
-# tuokou configuration template
+# tuokou 配置文件模板
 # Copy this file to config.yaml and fill in your LLM API credentials
+# 请将此文件复制为 config.yaml 并填入你的 LLM API 信息
 
 llm:
+  # API 地址（OpenAI 兼容接口）
   # API base URL (OpenAI-compatible)
+  # 支持：OpenAI、DeepSeek、通义千问、Ollama 本地模型等
   # Supported: OpenAI, DeepSeek, Qwen, Ollama (local), etc.
   base_url: "https://api.openai.com/v1"
 
+  # API 密钥
   # API key
   api_key: "your-api-key-here"
 
+  # 模型名称
   # Model name
-  # OpenAI: gpt-4o, gpt-4o-mini
+  # OpenAI: gpt-4o / gpt-4o-mini
   # DeepSeek: deepseek-chat
-  # Qwen: qwen-plus
+  # 通义千问: qwen-plus
   # Ollama: llama3
   model: "gpt-4o-mini"
+
+# 安全策略（可选，默认策略已内置）
+# Security policy (optional, default rules are built-in)
+# 如需自定义危险/修改关键词，在此覆盖
+# If you want to customize dangerous/modify keywords, override here
+# safety:
+#   dangerous_keywords:
+#     - "rm -rf"
+#     - "format"
+#   modify_keywords:
+#     - "pip install"
+#     - "mkdir"

@@ -1,4 +1,4 @@
-"""Command executor: run translated commands and capture output."""
+"""命令执行器：执行翻译后的命令并捕获输出。"""
 
 import subprocess
 import sys
@@ -6,17 +6,17 @@ from typing import Optional
 
 
 def execute(command: str, timeout: int = 60) -> Optional[str]:
-    """Execute a shell command and return its stdout.
+    """执行 shell 命令并返回输出。
 
-    On Windows, runs via powershell -NoProfile -Command.
-    On Linux/macOS, runs via a subprocess shell.
+    在 Windows 下通过 powershell -NoProfile -Command 执行，
+    在 Linux/macOS 下通过子进程 shell 执行。
 
-    Args:
-        command: The command to execute.
-        timeout: Timeout in seconds.
+    参数:
+        command: 待执行命令。
+        timeout: 超时时间（秒）。
 
-    Returns:
-        stdout on success, None on failure (stderr is printed).
+    返回:
+        成功时返回 stdout，失败时返回 None（stderr 会被打印）。
     """
     try:
         if sys.platform == "win32":
@@ -41,7 +41,7 @@ def execute(command: str, timeout: int = 60) -> Optional[str]:
         stderr = result.stderr.strip()
 
         if result.returncode != 0:
-            print(f"\n[tuokou] Command failed (exit code: {result.returncode})")
+            print(f"\n[脱口] 命令执行失败 (exit code: {result.returncode})")
             if stderr:
                 print(stderr)
             return None
@@ -52,8 +52,8 @@ def execute(command: str, timeout: int = 60) -> Optional[str]:
         return output
 
     except subprocess.TimeoutExpired:
-        print(f"\n[tuokou] Command timed out ({timeout}s)")
+        print(f"\n[脱口] 命令超时 ({timeout}s)")
         return None
     except Exception as e:
-        print(f"\n[tuokou] Execution error: {e}")
+        print(f"\n[脱口] 执行出错: {e}")
         return None

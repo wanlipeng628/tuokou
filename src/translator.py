@@ -1,10 +1,9 @@
-"""LLM translator: converts natural language into executable shell commands.
+"""LLM 翻译器：将自然语言翻译为可执行的 shell 命令。
 
-Uses an OpenAI-compatible API to call a large language model.
-Returns the translated command as a plain string.
+通过 OpenAI 兼容 API 调用大模型，返回翻译后的命令。
 
-TODO(v0.2): command correction mode — when a user mistypes an English command,
-attempt to infer their intent and suggest a fix.
+TODO(v0.2): 支持命令纠错模式——当用户输入一个不存在的英文命令时，
+尝试猜测用户意图并给出纠正建议。
 """
 
 import subprocess
@@ -14,28 +13,28 @@ from typing import Optional
 import yaml
 
 # -----------------------------------------------------------
-# System prompt
+# 系统提示词
 # -----------------------------------------------------------
 
-SYSTEM_PROMPT = """You are a command-line translator. The user describes what they want to do in Chinese, and you translate it into a single executable shell command.
+SYSTEM_PROMPT = """你是一个命令行翻译器。用户会用中文描述他想做的事，你需要翻译成一条可执行的 shell 命令。
 
-Rules:
-1. Output only the command itself — no explanation, no markdown code blocks, no extra text.
-2. The command must be directly executable in the current shell.
-3. If the user's description is ambiguous, choose the most common, reasonable implementation.
-4. Use the paths the user describes — do not substitute them.
-5. Output one command at a time. Chain multi-step operations with &&."""
+规则：
+1. 只输出命令本身，不要加任何解释、markdown 代码块标记、或前后缀文字
+2. 命令应该能直接在当前 shell 中执行
+3. 如果用户描述模糊，选择最常见、最合理的实现方式
+4. 涉及路径时使用用户描述的路径，不要随意替换
+5. 一次只输出一条命令。如果需要多步操作，用 && 连接"""
 
 
 # -----------------------------------------------------------
-# Shell context collector
+# 收集当前 shell 环境
 # -----------------------------------------------------------
 
 def _get_shell_context() -> dict:
-    """Collect current shell environment info to help the LLM generate accurate commands.
+    """收集当前 shell 环境信息，帮助 LLM 生成更准确的命令。
 
-    Uses Python built-in modules only (no subprocess calls to the shell).
-    This avoids deadlocks when called from within a PowerShell CommandNotFoundAction hook.
+    只用 Python 自带模块（不调 shell 子进程），
+    避免在 PowerShell 钩子里造成死锁。
     """
     import os as os_module
     import platform
@@ -57,11 +56,11 @@ def _get_shell_context() -> dict:
 
 
 # -----------------------------------------------------------
-# LLM call
+# LLM 调用
 # -----------------------------------------------------------
 
 class Translator:
-    """Translator: natural language → shell command."""
+    """翻译器：自然语言 → shell 命令。"""
 
     def __init__(self, config_path: str = "~/.tuokou/config.yaml"):
         import os
@@ -84,21 +83,21 @@ class Translator:
         return self._client
 
     def translate(self, user_input: str) -> Optional[str]:
-        """Translate Chinese input into a shell command.
+        """将用户的中文输入翻译为 shell 命令。
 
-        Args:
-            user_input: Chinese text entered by the user.
+        参数:
+            user_input: 用户在终端输入的中文文本。
 
-        Returns:
-            Translated command string, or None on failure.
+        返回:
+            翻译后的命令字符串，失败时返回 None。
         """
         llm = self.config.get("llm", {})
         model = llm.get("model", "gpt-4o")
 
         ctx = _get_shell_context()
         context_hint = (
-            f"Current OS: {ctx['os']}, Shell: {ctx['shell']}, "
-            f"Current dir: {ctx.get('current_dir', 'unknown')}"
+            f"当前系统: {ctx['os']}, Shell: {ctx['shell']}, "
+            f"当前目录: {ctx.get('current_dir', '未知')}"
         )
 
         try:
@@ -107,20 +106,17 @@ class Translator:
                 model=model,
                 messages=[
                     {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": f"[{context_hint}]\nUser input: {user_input}"},
+                    {"role": "user", "content": f"[{context_hint}]\n用户输入：{user_input}"},
                 ],
                 temperature=0.1,
                 max_tokens=500,
                 timeout=15,
             )
             command = response.choices[0].message.content.strip()
-            # Strip potential markdown wrapping
+            # 去掉可能的 markdown 包裹
             command = command.removeprefix("```").removesuffix("```").strip()
             return command if command else None
 
         except Exception as e:
-            print(f"\n[tuokou] Translation failed: {e}")
+            print(f"\n[脱口] 翻译失败: {e}")
             return None
-
-
-# Remove unused json import at top

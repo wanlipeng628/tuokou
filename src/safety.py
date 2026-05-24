@@ -1,11 +1,11 @@
-"""Safety classifier: determine command danger level and prompt for confirmation.
+"""安全分级：判断命令的危险等级并决定是否需要用户确认。
 
-Three tiers:
-- 🟢 READ: read-only, execute directly
-- 🟡 MODIFY: write/install, show command then ask for confirmation
-- 🔴 DANGEROUS: delete/system config, show warning then ask for confirmation
+三级划分：
+- 🟢 READ：只读操作，直接执行
+- 🟡 MODIFY：修改文件/安装软件，展示命令后确认
+- 🔴 DANGEROUS：删除/系统配置，加警告后确认
 
-Strategy: keyword matching + configurable rules.
+策略：关键词匹配 + 可配置规则。
 """
 
 from enum import Enum
@@ -19,9 +19,10 @@ class DangerLevel(Enum):
 
 
 # -----------------------------------------------------------
-# Default keyword rules
+# 默认关键词规则
 # -----------------------------------------------------------
 
+# 危险关键词（匹配到任意一个 → DANGEROUS）
 DANGEROUS_KEYWORDS = [
     "rm ", "rmdir", "del ", "erase",
     "rm -rf", "rm -r", "rd /s", "rd /q",
@@ -35,6 +36,7 @@ DANGEROUS_KEYWORDS = [
     "dd if=",
 ]
 
+# 修改关键词（匹配到任意一个 → MODIFY）
 MODIFY_KEYWORDS = [
     "mkdir", "touch", "new-item",
     "mv ", "move-item", "cp ", "copy-item",
@@ -52,6 +54,7 @@ MODIFY_KEYWORDS = [
     "export ", "setx", "set-env",
 ]
 
+# 查询关键词（匹配到任意一个 → READ，无须确认）
 READ_KEYWORDS = [
     "ls", "dir", "get-childitem",
     "cat ", "type ", "get-content",
@@ -83,20 +86,20 @@ READ_KEYWORDS = [
 
 
 def classify(command: str) -> tuple[DangerLevel, Optional[str]]:
-    """Classify a command's danger level.
+    """判断命令的危险等级。
 
-    Args:
-        command: The translated shell command.
+    参数:
+        command: 翻译后的 shell 命令。
 
-    Returns:
-        (level, warning_message). warning_message is only set for DANGEROUS.
+    返回:
+        (等级, 警告信息)。警告信息仅在 DANGEROUS 时有值。
     """
     lower = command.lower().strip()
 
     for kw in DANGEROUS_KEYWORDS:
         if kw.lower() in lower:
             return DangerLevel.DANGEROUS, (
-                "WARNING: This operation may cause data loss or system damage."
+                "警告：该操作可能造成数据丢失或系统损坏。"
             )
 
     for kw in MODIFY_KEYWORDS:
@@ -107,28 +110,28 @@ def classify(command: str) -> tuple[DangerLevel, Optional[str]]:
         if kw.lower() in lower:
             return DangerLevel.READ, None
 
-    # Default conservative: treat as MODIFY
+    # 默认保守策略：按修改处理
     return DangerLevel.MODIFY, None
 
 
 def get_user_confirmation(command: str, level: DangerLevel, warning: Optional[str] = None) -> bool:
-    """Prompt the user for confirmation.
+    """请求用户确认。
 
-    Args:
-        command: The command about to be executed.
-        level: Danger level.
-        warning: Additional warning (only for DANGEROUS).
+    参数:
+        command: 待执行命令。
+        level: 危险等级。
+        warning: 额外警告信息（仅 DANGEROUS 时有值）。
 
-    Returns:
-        True if user confirms, False otherwise.
+    返回:
+        用户确认返回 True，否则 False。
     """
     if warning:
         print(f"\n{warning}")
 
-    print(f"  Command: {command}")
+    print(f"  待执行: {command}")
 
     if level == DangerLevel.DANGEROUS:
-        prompt = "  Continue? [yes/NO] "
+        prompt = "  是否继续? [yes/NO] "
         try:
             answer = input(prompt).strip().lower()
             return answer in ("yes", "y")
@@ -136,7 +139,7 @@ def get_user_confirmation(command: str, level: DangerLevel, warning: Optional[st
             return False
 
     else:  # MODIFY
-        prompt = "  Execute? [Y/n] "
+        prompt = "  是否执行? [Y/n] "
         try:
             answer = input(prompt).strip().lower()
             return answer in ("", "y", "yes")

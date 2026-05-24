@@ -1,10 +1,10 @@
-"""tuokou CLI entry point.
+"""脱口 CLI 入口。
 
-Usage:
-  tuokou_handler.py <chinese input>   # Single-shot translation (for debugging)
-  tuokou_handler.py daemon            # Start background daemon
-  tuokou_handler.py stop              # Stop daemon
-  tuokou_handler.py status            # Check daemon status
+用法：
+  tuokou_handler.py <中文输入>   # 单次翻译（用于调试）
+  tuokou_handler.py daemon       # 启动后台守护进程
+  tuokou_handler.py stop         # 停止守护进程
+  tuokou_handler.py status       # 检查守护进程状态
 """
 
 import sys
@@ -15,11 +15,11 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage:")
-        print("  tuokou_handler.py <chinese text>    # Single translation")
-        print("  tuokou_handler.py daemon            # Start daemon")
-        print("  tuokou_handler.py stop              # Stop daemon")
-        print("  tuokou_handler.py status            # Check status")
+        print("用法:")
+        print("  tuokou_handler.py <中文文本>    # 单次翻译")
+        print("  tuokou_handler.py daemon        # 启动守护进程")
+        print("  tuokou_handler.py stop          # 停止守护进程")
+        print("  tuokou_handler.py status        # 检查状态")
         sys.exit(1)
 
     cmd = sys.argv[1]
@@ -37,12 +37,12 @@ def main():
     if cmd == "status":
         from src.daemon import is_running
         if is_running():
-            print("[tuokou] Daemon is running")
+            print("[脱口] 守护进程运行中")
         else:
-            print("[tuokou] Daemon is not running")
+            print("[脱口] 守护进程未运行")
         return
 
-    # Single-shot translation mode (for debugging)
+    # 单次翻译模式（用于调试）
     from src.shell_hook import handle_unknown_command
 
     raw_input = " ".join(sys.argv[1:])

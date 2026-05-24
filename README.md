@@ -109,6 +109,8 @@ llm:
 
 Supports any OpenAI-compatible API: OpenAI, DeepSeek, Qwen, Ollama (local), etc.
 
+> ⚠️ **Security Warning**: `config.yaml` contains your API key. **Do NOT commit it to Git repositories**. The project includes a `.gitignore` that automatically excludes this file, but please ensure you don't manually add it.
+
 > **Note for Windows users:** After install, open a **new** terminal window. The profile script auto-starts the daemon.
 
 ---
