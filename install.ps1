@@ -143,6 +143,7 @@ if (Get-Module -Name PSReadLine -ErrorAction SilentlyContinue) {
             }
 
             [Microsoft.PowerShell.PSConsoleReadLine]::AddToHistory(`$line)
+            [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
             [Microsoft.PowerShell.PSConsoleReadLine]::InvokePrompt()
             return
         }
