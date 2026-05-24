@@ -162,8 +162,10 @@ class Translator:
                 max_tokens=300,
                 timeout=15,
             )
-            summary = response.choices[0].message.content.strip()
-            return summary if summary else None
+            summary = response.choices[0].message.content
+            if summary and summary.strip():
+                return summary.strip()
+            return None
 
         except Exception as e:
             print(f"\n[脱口] 总结失败: {e}")
