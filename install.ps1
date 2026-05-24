@@ -118,9 +118,8 @@ if (Get-Module -Name PSReadLine -ErrorAction SilentlyContinue) {
         [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]`$line, [ref]`$cursor)
 
         if (`$line -match '[\u4e00-\u9fff]') {
-            # 回显用户输入
-            `$prompt = "PS `$(`$executionContext.SessionState.Path.CurrentLocation)> "
-            Write-Host "`$prompt`$line"
+            # 回显用户输入（只输出文本，不输出提示符——PSReadLine 已经自动渲染了）
+            Write-Host `$line
             [Microsoft.PowerShell.PSConsoleReadLine]::AddToHistory(`$line)
 
             # 调用守护进程，结果存入全局变量，由 prompt 函数负责显示
