@@ -54,21 +54,32 @@ class TuokouHandler(BaseHTTPRequestHandler):
         output = None
         if level == DangerLevel.READ:
             output = execute(command)
+            summary = None
+            if output:
+                t = self._get_translator()
+                summary = t.summarize(q, command, output)
 
         self._json({
             "command": command,
             "level": level_str,
             "warning": warning or "",
             "output": output or "",
+            "summary": summary or "",
         })
 
     def _handle_execute(self, params: dict):
         cmd = self._get_param(params, "cmd")
+        q = self._get_param(params, "q")
         if not cmd:
             return self._json({"error": "缺少参数 cmd"}, 400)
 
         output = execute(cmd)
-        self._json({"output": output or ""})
+        summary = None
+        if output and q:
+            t = self._get_translator()
+            summary = t.summarize(q, cmd, output)
+
+        self._json({"output": output or "", "summary": summary or ""})
 
     # ---- 辅助方法 ----
 

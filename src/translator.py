@@ -120,3 +120,51 @@ class Translator:
         except Exception as e:
             print(f"\n[脱口] 翻译失败: {e}")
             return None
+
+    def summarize(self, user_input: str, command: str, output: str) -> Optional[str]:
+        """用自然语言总结命令执行结果。
+
+        参数:
+            user_input: 用户原始输入（如"查看我的cpu型号"）。
+            command: 执行的命令（如"wmic cpu get name"）。
+            output: 命令的原始输出。
+
+        返回:
+            自然语言总结，失败时返回原始输出作为备选。
+        """
+        if not output:
+            return None
+
+        llm = self.config.get("llm", {})
+        model = llm.get("model", "gpt-4o")
+
+        summary_prompt = (
+            f"用户的问题是：{user_input}\n"
+            f"你翻译并执行了命令：{command}\n"
+            f"命令输出：{output}\n\n"
+            f"请用自然语言直接回答用户的问题。"
+            f"不要说『根据命令输出』『翻译成命令』这类的话，"
+            f"就当是你自己查到的，直接告诉他结果。"
+            f"简洁自然，一两句话就行。"
+        )
+
+        try:
+            client = self._get_client()
+            response = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": "你是一个贴心的命令行助手。"
+                     "用户用中文问你问题，你翻译成命令执行后，"
+                     "用自然语言直接回答他。"},
+                    {"role": "user", "content": summary_prompt},
+                ],
+                temperature=0.3,
+                max_tokens=300,
+                timeout=15,
+            )
+            summary = response.choices[0].message.content.strip()
+            return summary if summary else None
+
+        except Exception as e:
+            print(f"\n[脱口] 总结失败: {e}")
+            return None

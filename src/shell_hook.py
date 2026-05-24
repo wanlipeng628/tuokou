@@ -49,7 +49,11 @@ def handle_unknown_command(raw_input: str) -> int:
 
         output = execute(command)
         if output:
-            print(output)
+            summary = translator.summarize(raw_input, command, output)
+            if summary:
+                print(summary)
+            else:
+                print(output)
         return 0
 
     elif level in (DangerLevel.MODIFY, DangerLevel.DANGEROUS):
@@ -64,7 +68,11 @@ def handle_unknown_command(raw_input: str) -> int:
         print(f"\n[脱口] 正在执行...")
         output = execute(command)
         if output:
-            print(output)
+            summary = translator.summarize(raw_input, command, output)
+            if summary:
+                print(summary)
+            else:
+                print(output)
         return 0
 
     return 127
