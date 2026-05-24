@@ -1,0 +1,17 @@
+# tuokou configuration template
+# Copy this file to config.yaml and fill in your LLM API credentials
+
+llm:
+  # API base URL (OpenAI-compatible)
+  # Supported: OpenAI, DeepSeek, Qwen, Ollama (local), etc.
+  base_url: "https://api.openai.com/v1"
+
+  # API key
+  api_key: "your-api-key-here"
+
+  # Model name
+  # OpenAI: gpt-4o, gpt-4o-mini
+  # DeepSeek: deepseek-chat
+  # Qwen: qwen-plus
+  # Ollama: llama3
+  model: "gpt-4o-mini"
